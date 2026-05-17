@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,8 +12,10 @@
             font-family: 'Inter', sans-serif; 
             background-color: #f8fafc; 
             color: #0f172a;
+            transition: background-color 0.3s ease;
         }
 
+        /* Essential Sticky Scroll Mechanics */
         .roster-wrapper {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -30,22 +31,21 @@
             border-right: 1px solid #e2e8f0;
         }
 
-        /* Mobile "Rolling" Sidebar Shadow */
+        /* Mobile Layout & Rolling Sidebar Configurations */
         .mode-mobile .sticky-col { 
             min-width: 95px !important; 
             padding: 0.75rem !important; 
             font-size: 0.7rem;
-            box-shadow: 6px 0 15px -5px rgba(0,0,0,0.08);
+            box-shadow: 6px 0 15px -5px rgba(0,0,0,0.1);
         }
-        
-        .mode-mobile .cell-input { min-width: 75px; height: 50px; font-size: 0.75rem; }
+        .mode-mobile .cell-input, .mode-mobile .preview-cell { min-width: 75px; height: 50px; font-size: 0.75rem; }
 
-        /* Desktop Layout */
+        /* Desktop Layout Configurations */
         .mode-desktop .main-grid { grid-template-columns: 300px 1fr; }
         .mode-desktop .sticky-col { min-width: 220px; padding: 1.5rem; }
-        .mode-desktop .cell-input { min-width: 100px; height: 60px; font-size: 0.875rem; }
+        .mode-desktop .cell-input, .mode-desktop .preview-cell { min-width: 100px; height: 60px; font-size: 0.875rem; }
 
-        /* Tactical Shift Colors */
+        /* Workspace Shift Colors */
         .shift-R { color: #be123c; font-weight: 800; } 
         .shift-MN { color: #6d28d9; font-weight: 800; } 
         .shift-O { color: #047857; font-weight: 800; } 
@@ -53,7 +53,7 @@
         .shift-CR { color: #d97706; background-color: #fffbeb !important; font-weight: 800; border: 2px dashed #fbbf24 !important; }
         .shift-L { color: #64748b; font-weight: 800; text-decoration: line-through; opacity: 0.5; }
         
-        /* The Purple Tweak */
+        /* Purple Manual Tweaks */
         .is-tweak { 
             background-color: #f5f3ff !important; 
             color: #5b21b6 !important;
@@ -62,6 +62,98 @@
 
         .excess-cell { background-color: #f0fdf4 !important; }
         .gap-cell { background-color: #fef2f2 !important; }
+
+        /* Clean Full-Screen Preview Overlay */
+        #preview-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 1000;
+            overflow: auto;
+        }
+        body.preview-active { overflow: hidden; }
+
+        /* --- High-Specificity Preview Mode Color Map Overrides & Text Size Scaling --- */
+        .preview-table-container td {
+            background-color: #ffffff !important;
+        }
+        
+        /* Personnel Name Font Size in Preview */
+        .preview-table-container td.sticky-col {
+            font-size: 1.1rem !important;
+            font-weight: 900 !important;
+            color: #0f172a !important;
+        }
+        @media (min-width: 640px) {
+            .preview-table-container td.sticky-col {
+                font-size: 1.45rem !important;
+            }
+        }
+
+        /* Date Header Font Size in Preview */
+        .preview-table-container th div {
+            font-size: 0.85rem !important;
+            line-height: 1.25 !important;
+        }
+        @media (min-width: 640px) {
+            .preview-table-container th div {
+                font-size: 1.05rem !important;
+            }
+        }
+        .preview-table-container th .text-slate-900 {
+            font-size: 1.15rem !important;
+        }
+        @media (min-width: 640px) {
+            .preview-table-container th .text-slate-900 {
+                font-size: 1.5rem !important;
+            }
+        }
+
+        /* General Shift Text inside Preview */
+        .preview-table-container .preview-cell {
+            background-color: #ffffff !important;
+            font-weight: 900;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem !important; /* Scaled up for mobile screenshots */
+            padding: 0.5rem 0;
+        }
+        @media (min-width: 640px) {
+            .preview-table-container .preview-cell {
+                font-size: 1.85rem !important; /* Scaled up for desktop screenshots */
+                padding: 0.75rem 0;
+            }
+        }
+
+        /* Usual proper shifts (D, MN, O) -> Black text */
+        .preview-table-container .preview-cell.shift-D,
+        .preview-table-container .preview-cell.shift-MN,
+        .preview-table-container .preview-cell.shift-O {
+            color: #000000 !important;
+        }
+        /* Rest (R) -> Green text */
+        .preview-table-container .preview-cell.shift-R {
+            color: #16a34a !important; 
+        }
+        /* Tweaked/changed shifts -> Purple text */
+        .preview-table-container .preview-cell.is-tweak-preview {
+            color: #7c3aed !important; 
+        }
+        /* Compensatory Rest -> Purple dashed text */
+        .preview-table-container .preview-cell.shift-CR {
+            color: #7c3aed !important;
+            border: 2.5px dashed #c084fc !important;
+            border-radius: 0.5rem;
+        }
+        /* Leave -> Grey strikethrough text */
+        .preview-table-container .preview-cell.shift-L {
+            color: #94a3b8 !important;
+            text-decoration: line-through;
+        }
 
         .custom-scrollbar::-webkit-scrollbar { height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
@@ -73,38 +165,38 @@
 </head>
 <body id="body-root" class="mode-desktop min-h-screen pb-10">
 
-    <div class="max-w-[100%] mx-auto py-4 sm:py-8 px-4 sm:px-8">
+    <div id="main-ui" class="max-w-[100%] mx-auto py-4 sm:py-8 px-4 sm:px-8">
         
         <!-- Header -->
-        <header class="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-8 gap-6">
+        <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-6">
             <div class="animate-fade">
                 <div class="flex items-center gap-3">
-                    <div class="bg-indigo-600 p-2 rounded-xl text-white shadow-xl">
+                    <div class="bg-indigo-600 p-2.5 rounded-2xl text-white shadow-xl">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                     </div>
-                    <h1 class="text-4xl font-black tracking-tighter text-slate-900 italic">ROSTER<span class="text-indigo-600">BOT</span></h1>
+                    <h1 class="text-4xl font-black tracking-tighter text-slate-900">ROSTER<span class="text-indigo-600">BOT</span></h1>
                 </div>
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.5em] mt-1 ml-1">Precision Roster Engine</p>
             </div>
 
+            <!-- Dashboard Options -->
             <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full xl:w-auto animate-fade">
-                <!-- Layout Toggle -->
                 <div onclick="toggleLayout()" class="bg-white p-1 rounded-2xl border border-slate-200 flex items-center shadow-sm cursor-pointer mr-2">
                     <div id="d-btn" class="px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all bg-indigo-600 text-white shadow-md">Desktop</div>
                     <div id="m-btn" class="px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all text-slate-400">Mobile</div>
                 </div>
 
-                <button onclick="exportCSV()" class="px-4 py-3.5 bg-white border border-slate-200 rounded-2xl font-bold text-[9px] uppercase tracking-widest hover:bg-slate-50 transition-all">CSV</button>
-                <button onclick="resetRoster()" class="px-4 py-3.5 bg-white border border-red-100 text-red-600 rounded-2xl font-bold text-[9px] uppercase tracking-widest hover:bg-red-50 transition-all">Restore</button>
+                <button onclick="enterPreview()" class="px-4 py-3.5 bg-blue-50 text-blue-700 border border-blue-100 rounded-2xl font-bold text-[9px] uppercase tracking-widest hover:bg-blue-100 transition-all">Preview View</button>
+                <button onclick="exportCSV()" class="px-4 py-3.5 bg-white border border-slate-200 rounded-2xl font-bold text-[9px] uppercase tracking-widest hover:bg-slate-50 shadow-sm transition-all">CSV</button>
+                <button onclick="resetToPatternPrompt()" class="px-4 py-3.5 bg-white border border-red-100 text-red-600 rounded-2xl font-bold text-[9px] uppercase tracking-widest hover:bg-red-50 transition-all">Restore</button>
                 <button onclick="extendPrompt()" class="px-4 py-3.5 bg-slate-900 text-white border border-slate-800 rounded-2xl font-bold text-[9px] uppercase tracking-widest hover:bg-black transition-all">Extend +</button>
-                <button onclick="runTacticalSolver()" class="flex-1 xl:flex-none px-10 py-3.5 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.15em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95">
+                <button onclick="runTacticalSolver()" class="flex-1 xl:flex-none px-8 py-3.5 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.15em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95">
                     Make Roster
                 </button>
             </div>
         </header>
 
         <div class="main-grid grid gap-8 items-start">
-            
             <!-- Sidebar -->
             <div id="sidebar-container" class="space-y-6 animate-fade">
                 <div class="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm">
@@ -115,43 +207,45 @@
                         </div>
                         <input type="hidden" id="days-count" value="14">
                     </div>
-
-                    <div id="staff-list" class="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-1">
-                        <!-- Personnel -->
-                    </div>
-
-                    <button onclick="addStaff()" class="mt-6 w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-[10px] font-black text-slate-400 uppercase hover:border-indigo-400 hover:text-indigo-600 transition-all">
-                        + Add Member
-                    </button>
+                    <div id="staff-list" class="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-1"></div>
+                    <button onclick="addStaff()" class="mt-6 w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-[10px] font-black text-slate-400 uppercase hover:border-indigo-400 transition-all">+ Add Member</button>
                 </div>
             </div>
 
-            <!-- Table -->
+            <!-- Table Workspace -->
             <div class="animate-fade" style="animation-delay: 0.1s">
                 <div class="bg-white rounded-[2.5rem] border border-slate-200 shadow-2xl overflow-hidden">
                     <div class="roster-wrapper custom-scrollbar">
-                        <table id="roster-table" class="w-full border-collapse text-xs">
-                        </table>
-                    </div>
-                </div>
-                
-                <div class="flex flex-wrap gap-4 mt-6 px-4 justify-start opacity-50">
-                    <div class="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase">
-                        <span class="w-3 h-3 bg-purple-200 border border-purple-300 rounded"></span> Manual Tweak
-                    </div>
-                    <div class="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase">
-                        <span class="w-3 h-3 bg-amber-100 border border-amber-400 border-dashed rounded"></span> Compensatory Rest
+                        <table id="roster-table" class="w-full border-collapse text-xs"></table>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
+    <!-- Full Screen Preview Overlay (Screenshot-Ready Layout) -->
+    <div id="preview-overlay" class="p-6 md:p-10">
+        <div class="max-w-[100%] mx-auto">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 px-4">
+                <div>
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tighter uppercase italic">PRND Roster Snapshot</h2>
+                    <p id="preview-date-range" class="text-xs font-bold text-slate-400 uppercase tracking-widest"></p>
+                </div>
+                <button onclick="exitPreview()" class="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs shadow-xl tracking-wider active:scale-95 transition-all">Close Preview</button>
+            </div>
+            <div class="bg-white border-2 border-slate-200 rounded-[2rem] overflow-hidden">
+                <div id="preview-table-container" class="preview-table-container roster-wrapper">
+                    <!-- Clean static content generated by enterPreview() -->
+                </div>
+            </div>
+            <p class="mt-6 text-center text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">Generated by RosterBot Precision Engine</p>
         </div>
     </div>
 
     <!-- Modals -->
     <div id="extend-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-6">
-        <div class="bg-white rounded-[2.5rem] p-10 max-w-sm w-full shadow-2xl">
-            <h3 class="text-2xl font-black mb-6 text-slate-900">Extend timeline</h3>
+        <div class="bg-white rounded-[2.5rem] p-10 max-w-sm w-full shadow-2xl animate-fade">
+            <h3 class="text-2xl font-black mb-2 text-slate-900">Extend</h3>
             <input type="number" id="ext-val" value="7" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-black mb-8 focus:ring-2 focus:ring-indigo-600 outline-none">
             <div class="flex gap-3">
                 <button onclick="closeModals()" class="flex-1 py-4 bg-slate-100 rounded-2xl font-bold text-slate-600 uppercase text-xs">Cancel</button>
@@ -160,8 +254,19 @@
         </div>
     </div>
 
+    <div id="reset-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-6">
+        <div class="bg-white rounded-[2.5rem] p-10 max-w-sm w-full shadow-2xl animate-fade">
+            <h3 class="text-2xl font-black mb-2 text-red-600 tracking-tight italic">Restore</h3>
+            <p class="text-sm text-slate-500 mb-8 font-medium">Wipe manual tweaks and return to pattern?</p>
+            <div class="flex gap-3">
+                <button onclick="closeModals()" class="flex-1 py-4 bg-slate-100 rounded-2xl font-bold text-slate-600 uppercase text-xs">No, Keep</button>
+                <button onclick="confirmReset()" class="flex-1 py-4 bg-red-600 rounded-2xl font-bold text-white uppercase text-xs shadow-lg shadow-red-100">Reset</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- Persistence ---
+        // --- Persistence Layer ---
         let staff = [
             { id: '1', name: 'PK', restDay: 2 },
             { id: '2', name: 'SS', restDay: 3 },
@@ -236,17 +341,17 @@
             }
             
             let html = `<thead><tr class="bg-slate-50 border-b border-slate-200">
-                <th class="sticky-col text-left font-black text-slate-400 uppercase text-[8px] tracking-[0.2em]">Personnel</th>`;
+                <th class="sticky-col text-left font-black text-slate-400 uppercase text-[8px] tracking-widest px-8 bg-slate-50">Personnel</th>`;
             dates.forEach(d => {
-                html += `<th class="p-3 sm:p-4 text-center border-r border-slate-100 min-w-[80px] sm:min-w-[110px]">
+                html += `<th class="p-4 text-center border-r border-slate-100 min-w-[85px] sm:min-w-[110px]">
                     <div class="text-[9px] text-indigo-500 font-black tracking-tighter">${d.weekday}</div>
-                    <div class="text-slate-900 font-black text-[10px] sm:text-xs">${d.day} ${d.month}</div>
+                    <div class="text-slate-900 font-black text-xs">${d.day} ${d.month}</div>
                 </th>`;
             });
             html += `</tr></thead><tbody class="divide-y divide-slate-100">`;
             
             staff.forEach(p => {
-                html += `<tr><td class="sticky-col font-black text-slate-700 transition-all text-xs sm:text-sm">
+                html += `<tr><td class="sticky-col font-black text-slate-700 transition-all text-xs sm:text-sm px-8">
                     ${p.name}
                     <div class="text-[7px] text-indigo-300 uppercase font-black mt-1 tracking-widest">${WEEKDAYS[p.restDay]} Anchor</div>
                 </td>`;
@@ -254,14 +359,14 @@
                     const key = `${p.name}-${d.iso}`;
                     const entry = registry[key] || { val: '', tweak: false };
                     html += `<td class="p-0 border-r border-slate-50">
-                        <input type="text" id="cell-${key}" value="${entry.val}" oninput="tweakCell('${p.name}','${d.iso}',this.value)" placeholder="-" class="cell-input w-full p-2 text-center bg-transparent font-black uppercase transition-all ${entry.tweak?'is-tweak':''} shift-${entry.val}">
+                        <input type="text" id="cell-${key}" value="${entry.val}" oninput="tweakCell('${p.name}','${d.iso}',this.value)" placeholder="-" class="cell-input w-full p-2 text-center bg-transparent font-black uppercase text-sm transition-all ${entry.tweak?'is-tweak':''} shift-${entry.val}">
                     </td>`;
                 });
                 html += `</tr>`;
             });
             
-            html += `<tr class="bg-slate-900 text-white"><td class="sticky-col !bg-slate-900 font-black text-[7px] uppercase text-slate-500 italic tracking-[0.2em] px-4">Status</td>`;
-            dates.forEach(d => html += `<td id="cov-${d.iso}" class="p-2 text-center text-[7px] font-black">-</td>`);
+            html += `<tr class="bg-slate-900 text-white"><td class="sticky-col !bg-slate-900 font-black text-[9px] uppercase text-slate-500 italic tracking-[0.2em] px-8">Status</td>`;
+            dates.forEach(d => html += `<td id="cov-${d.iso}" class="p-2 text-center text-[8px] font-black">-</td>`);
             html += `</tr></tbody>`;
             table.innerHTML = html;
             validate();
@@ -269,17 +374,11 @@
 
         function tweakCell(name, date, val) {
             const key = `${name}-${date}`; const up = val.toUpperCase();
-            
-            // Leave Sanctity Rule: If marking L on O shift day, previous MN must be removed
             if (up === 'L') {
                 const prevD = new Date(date); prevD.setDate(prevD.getDate()-1);
                 const prevIso = prevD.toISOString().split('T')[0];
-                const prevKey = `${name}-${prevIso}`;
-                if (registry[prevKey]?.val === 'MN') {
-                    delete registry[prevKey]; // Remove the Night shift if Leave replaces the recovery
-                }
+                if (registry[`${name}-${prevIso}`]?.val === 'MN') delete registry[`${name}-${prevIso}`];
             }
-
             if (up === '') delete registry[key]; else registry[key] = { val: up, tweak: true };
             renderTable();
         }
@@ -288,68 +387,57 @@
             const start = new Date(document.getElementById('start-date').value);
             const days = parseInt(document.getElementById('days-count').value);
             const buffer = {};
-            const debt = {}; // Track withdrawn rests per person
-
+            const debt = {};
             for(let i=0; i<days; i++) {
                 const ds = dIso(start, i);
-                let dayAsgn = {};
-                
-                // Pass 1: Apply Manual Tweaks
-                staff.forEach(p => { 
-                    const k = `${p.name}-${ds}`; 
-                    if(registry[k]?.tweak) dayAsgn[p.name] = registry[k].val; 
-                });
+                const currDate = new Date(start); currDate.setDate(start.getDate() + i);
+                const weekday = currDate.getDay();
 
-                // Pass 2: Recovery Logic (O after MN)
+                let dayAsgn = {};
+                staff.forEach(p => { if(registry[`${p.name}-${ds}`]?.tweak) dayAsgn[p.name] = registry[`${p.name}-${ds}`].val; });
                 if (i > 0) {
                     const pds = dIso(start, i-1);
-                    staff.forEach(p => { 
-                        if (buffer[`${p.name}-${pds}`] === 'MN' && !dayAsgn[p.name]) dayAsgn[p.name] = 'O'; 
-                    });
+                    staff.forEach(p => { if (buffer[`${p.name}-${pds}`] === 'MN' && !dayAsgn[p.name]) dayAsgn[p.name] = 'O'; });
                 }
-
-                // Pass 3: Pattern Application
                 staff.forEach(p => {
                     if (dayAsgn[p.name]) return;
-                    let idl = PATTERN[( (new Date(start).getDay() + i) - p.restDay + 7) % 7];
+                    
+                    // Strict rule: If tomorrow is tweaked to Leave 'L', today CANNOT be 'MN' (prevents Leave on O shift day)
+                    const nextDate = new Date(currDate); nextDate.setDate(currDate.getDate() + 1);
+                    const nds = nextDate.toISOString().split('T')[0];
+                    const tomorrowIsLeave = (registry[`${p.name}-${nds}`]?.val === 'L' && registry[`${p.name}-${nds}`]?.tweak);
+
+                    let idl = PATTERN[(weekday - p.restDay + 7) % 7];
+                    
+                    if (idl === 'MN' && tomorrowIsLeave) {
+                        idl = 'D'; // Force shift pivot to avoid violating O-shift Leave rule
+                    }
+
                     if (idl === 'O' && i > 0 && buffer[`${p.name}-${dIso(start, i-1)}`] !== 'MN') idl = 'D';
                     dayAsgn[p.name] = idl;
                 });
-
-                // Pass 4: Coverage Gaps & Rest Withdrawal
                 const mand = ['D', 'MN', 'O']; 
                 let miss = mand.filter(s => !Object.values(dayAsgn).includes(s));
                 if (miss.length > 0) miss.forEach(m => {
-                    // Priority 1: Excess D
                     let cand = staff.find(p => dayAsgn[p.name] === 'D' && Object.values(dayAsgn).filter(v => v==='D').length > 1 && !registry[`${p.name}-${ds}`]?.tweak);
-                    // Priority 2: Withdraw Rest (R)
                     if (!cand) {
                         cand = staff.find(p => dayAsgn[p.name] === 'R' && !registry[`${p.name}-${ds}`]?.tweak);
                         if (cand) debt[cand.name] = (debt[cand.name] || 0) + 1;
                     }
                     if (cand) dayAsgn[cand.name] = m;
                 });
-
-                // Pass 5: CR Repayment
                 staff.forEach(p => {
                     if (debt[p.name] > 0 && !registry[`${p.name}-${ds}`]?.tweak) {
-                        // If this person has a debt AND they are currently assigned a non-mandatory excess shift
-                        const currentVal = dayAsgn[p.name];
-                        const surplusCount = Object.values(dayAsgn).filter(v => v === currentVal).length;
-                        // Avoid replacing O-after-MN
-                        const prevIso = i > 0 ? dIso(start, i-1) : null;
-                        const isMandatoryO = (currentVal === 'O' && buffer[`${p.name}-${prevIso}`] === 'MN');
-
-                        if (surplusCount > 1 && !isMandatoryO && !['R','L'].includes(currentVal)) {
-                            dayAsgn[p.name] = 'CR';
-                            debt[p.name]--;
+                        const cur = dayAsgn[p.name];
+                        const surp = Object.values(dayAsgn).filter(v => v === cur).length;
+                        const pds = i > 0 ? dIso(start, i-1) : null;
+                        if (surp > 1 && !(cur === 'O' && buffer[`${p.name}-${pds}`] === 'MN') && !['R','L'].includes(cur)) {
+                            dayAsgn[p.name] = 'CR'; debt[p.name]--;
                         }
                     }
                 });
-
                 staff.forEach(p => buffer[`${p.name}-${ds}`] = dayAsgn[p.name]);
             }
-
             Object.keys(buffer).forEach(k => { if(!registry[k]?.tweak) registry[k] = { val: buffer[k], tweak: false }; });
             renderTable();
         }
@@ -365,25 +453,75 @@
                 const el = document.getElementById(`cov-${ds}`); if(!el) continue;
                 const miss = ['D', 'MN', 'O'].filter(s => cnts[s] === 0);
                 el.innerHTML = miss.length > 0 ? `<span class="text-red-400">GAP</span>` : `<span class="opacity-40 tracking-widest uppercase">Secure</span>`;
-                staff.forEach(p => {
-                    const c = document.getElementById(`cell-${p.name}-${ds}`); if(!c) return;
-                    if(['D','MN','O'].includes(c.value) && cnts[c.value] > 1) c.parentElement.classList.add('excess-cell');
-                    else c.parentElement.classList.remove('excess-cell');
-                });
             }
         }
 
+        // --- Screenshot Optimized Preview Mode (v18.0 Refined Colors & Text Scaling) ---
+        function enterPreview() {
+            const start = new Date(document.getElementById('start-date').value);
+            const days = parseInt(document.getElementById('days-count').value);
+            document.getElementById('preview-date-range').innerText = `Roster Windows: ${start.toLocaleDateString('en-GB', { dateStyle: 'medium' })} to ${new Date(dIso(start, days-1)).toLocaleDateString('en-GB', { dateStyle: 'medium' })}`;
+            
+            const currentMode = isMobile ? 'mode-mobile' : 'mode-desktop';
+            document.getElementById('preview-overlay').className = `${currentMode} fixed inset-0 bg-white z-[1000] overflow-auto p-4 md:p-10`;
+
+            let html = `<table class="w-full border-collapse"><thead><tr class="bg-slate-50 border-b-2 border-slate-200">
+                <th class="sticky-col text-left font-black text-slate-900 uppercase text-[10px] px-8 bg-slate-50">Personnel</th>`;
+            
+            const dates = [];
+            for(let i=0; i<days; i++) {
+                const d = new Date(start); d.setDate(start.getDate() + i);
+                const weekday = WEEKDAYS[d.getDay()];
+                dates.push({ iso: d.toISOString().split('T')[0], day: d.getDate() });
+                html += `<th class="p-4 text-center border-r border-slate-200 min-w-[85px] sm:min-w-[110px]">
+                    <div class="text-[9px] text-indigo-600 font-black">${weekday}</div>
+                    <div class="text-slate-900 font-black text-sm">${d.getDate()}</div>
+                </th>`;
+            }
+            html += `</tr></thead><tbody class="divide-y divide-slate-200">`;
+            
+            staff.forEach(p => {
+                html += `<tr><td class="sticky-col font-black text-slate-800 text-sm px-8 bg-white">${p.name}</td>`;
+                dates.forEach(d => {
+                    const key = `${p.name}-${d.iso}`;
+                    const entry = registry[key];
+                    const val = entry?.val || '-';
+                    const tweakClass = entry?.tweak ? 'is-tweak-preview' : '';
+                    
+                    html += `<td class="p-0 border-r border-slate-100 bg-white">
+                        <div class="preview-cell shift-${val} ${tweakClass}">${val}</div>
+                    </td>`;
+                });
+                html += `</tr>`;
+            });
+            html += `</tbody></table>`;
+            
+            document.getElementById('preview-table-container').innerHTML = html;
+            document.getElementById('preview-overlay').style.display = 'block';
+            document.body.classList.add('preview-active');
+        }
+
+        function exitPreview() {
+            document.getElementById('preview-overlay').style.display = 'none';
+            document.body.classList.remove('preview-active');
+        }
+
+        // --- Actions ---
         function extendPrompt() { document.getElementById('extend-modal').classList.remove('hidden'); }
-        function closeModals() { document.getElementById('extend-modal').classList.add('hidden'); }
+        function resetToPatternPrompt() { document.getElementById('reset-modal').classList.remove('hidden'); }
+        function closeModals() { 
+            document.getElementById('extend-modal').classList.add('hidden'); 
+            document.getElementById('reset-modal').classList.add('hidden'); 
+        }
         function doExtend() {
             const add = parseInt(document.getElementById('ext-val').value) || 7;
             document.getElementById('days-count').value = parseInt(document.getElementById('days-count').value) + add;
             closeModals(); renderTable();
         }
-        function resetRoster() { if(confirm("Restore all shifts to pattern? Tweaks will be lost.")) { registry = {}; renderTable(); } }
+        function confirmReset() { registry = {}; closeModals(); renderTable(); }
         function exportCSV() {
             const start = document.getElementById('start-date').value; const days = parseInt(document.getElementById('days-count').value);
-            let csv = "ROSTERBOT EXPORT\nName";
+            let csv = "ROSTERBOT\nName";
             for(let i=0; i<days; i++) csv += `,${dIso(start, i)}`; csv += "\n";
             staff.forEach(p => { csv += p.name; for(let i=0; i<days; i++) csv += `,${registry[`${p.name}-${dIso(start, i)}`]?.val || ''}`; csv += "\n"; });
             const blob = new Blob([csv], { type: 'text/csv' });
